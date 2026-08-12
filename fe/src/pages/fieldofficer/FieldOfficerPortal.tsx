@@ -4,6 +4,12 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { logout } from '../../store/authSlice';
 import { translations } from '../../i18n/translations';
 import type { Assignment } from './types';
+import {
+  fetchFOAssignments,
+  fetchFOStats,
+  updateFOAssignmentStatus,
+  escalateFOAssignment,
+} from '../../store/fieldOfficerSlice';
 
 // Import subcomponents
 import FOHome from './pages/FOHome';
@@ -19,6 +25,11 @@ const FieldOfficerPortal: React.FC = () => {
   const t = translations[language];
   const activeScreen = (searchParams.get('screen') || 'home') as 'home' | 'tasks' | 'detail' | 'map' | 'stats';
   const selectedId = searchParams.get('id');
+
+  React.useEffect(() => {
+    dispatch(fetchFOAssignments());
+    dispatch(fetchFOStats());
+  }, [dispatch]);
 
   // Modal / overlay states
   const [escalateModalOpen, setEscalateModalOpen] = useState(false);
@@ -203,6 +214,16 @@ const FieldOfficerPortal: React.FC = () => {
         return a;
       })
     );
+    if (selectedId) {
+      // Dispatch status update to Field Officer Microservice Backend API
+      dispatch(
+        updateFOAssignmentStatus({
+          id: selectedId,
+          status: 'Resolved',
+          fieldNotes: fieldNotes,
+        })
+      );
+    }
     showToast('Marked as visited & resolved');
     handleScreenChange('tasks');
   };
@@ -222,6 +243,14 @@ const FieldOfficerPortal: React.FC = () => {
           };
         }
         return a;
+      })
+    );
+    // Dispatch escalation to Field Officer Microservice Backend API
+    dispatch(
+      escalateFOAssignment({
+        id: selectedId,
+        reason: 'Critical action required',
+        notes: fieldNotes,
       })
     );
     setEscalateModalOpen(false);

@@ -23,7 +23,7 @@ public class JwtService {
     @Value("${application.security.jwt.access-token.expiration:900000}") // 15 minutes default
     private long accessTokenExpiration;
 
-    @Value("${application.security.jwt.refresh-token.expiration:604800000}") // 7 days default
+    @Value("${application.security.jwt.refresh-token.expiration:2592000000}") // 30 days default (Government scale cost saving)
     private long refreshTokenExpiration;
 
     public String extractUsername(String token) {

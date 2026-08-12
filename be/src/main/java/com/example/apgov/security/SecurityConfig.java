@@ -22,10 +22,12 @@ import java.util.Collections;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
+    private final RateLimitingFilter rateLimitingFilter;
 
     @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+    public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter, RateLimitingFilter rateLimitingFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
+        this.rateLimitingFilter = rateLimitingFilter;
     }
 
     @Bean
@@ -35,6 +37,10 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll() // Expose public authentication endpoints
+                .requestMatchers("/api/common/**").permitAll() // Shared reference metadata
+                .requestMatchers("/api/citizen/**").hasAnyRole("citizen", "coordinator", "mla") // Citizen APIs
+                .requestMatchers("/api/coordinator/**").hasAnyRole("coordinator", "mla") // Coordinator APIs
+                .requestMatchers("/api/field-officer/**").hasAnyRole("fieldofficer", "coordinator", "mla") // Field Officer APIs
                 .requestMatchers("/api/mla/**").hasRole("mla") // Restrict MLA endpoints to mla role
                 .requestMatchers("/api/**").authenticated()   // Secure all other backend API routes
                 .anyRequest().permitAll()
@@ -42,6 +48,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless JWT sessions
             )
+            .addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

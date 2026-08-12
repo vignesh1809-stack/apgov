@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../../store';
+import { useAppSelector, useAppDispatch } from '../../store';
+import { bookCitizenAppointment } from '../../store/citizenSlice';
 import { translations } from '../../i18n/translations';
 
 const MlaOffice: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const { language } = useAppSelector((state) => state.ui);
   const t = translations[language];
 
@@ -17,7 +19,9 @@ const MlaOffice: React.FC = () => {
     e.preventDefault();
     if (!date || !purpose) return;
     
-    // Simulate API request submission
+    // Dispatch to Citizen Microservice API
+    dispatch(bookCitizenAppointment({ date, purpose }));
+
     setShowToast(true);
     setTimeout(() => {
       setShowToast(false);

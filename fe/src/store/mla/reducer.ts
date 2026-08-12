@@ -1,12 +1,23 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import type { MlaState, MlaKpis, MlaCategoryKpi, MlaVillagePerformance, MlaMandalPerformance } from './types';
-import { fetchMlaKpis, fetchMlaCategoryKpis, fetchMlaVillagePerformance, fetchMlaMandalPerformance } from './actions';
+import type { MlaState, MlaKpis, MlaCategoryKpi, MlaVillagePerformance, MlaMandalPerformance, MlaAnalytics } from './types';
+import {
+  fetchMlaKpis,
+  fetchMlaCategoryKpis,
+  fetchMlaVillagePerformance,
+  fetchMlaMandalPerformance,
+  fetchMlaAnalytics,
+  fetchConstituencyGrievances,
+  resolveMlaGrievance,
+  addMlaComment,
+} from './actions';
 
 const initialState: MlaState = {
   kpis: null,
   categoryKpis: null,
   villagePerformance: null,
   mandalPerformance: null,
+  analytics: null,
+  constituencyGrievances: [],
   loading: false,
   error: null,
 };
@@ -20,6 +31,8 @@ const mlaSlice = createSlice({
       state.categoryKpis = null;
       state.villagePerformance = null;
       state.mandalPerformance = null;
+      state.analytics = null;
+      state.constituencyGrievances = [];
       state.loading = false;
       state.error = null;
     },
@@ -38,7 +51,7 @@ const mlaSlice = createSlice({
       })
       .addCase(fetchMlaKpis.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An error occurred';
+        state.error = (action.payload as string) || 'An error occurred';
       })
       // Fetch Category KPIs
       .addCase(fetchMlaCategoryKpis.pending, (state) => {
@@ -52,7 +65,7 @@ const mlaSlice = createSlice({
       })
       .addCase(fetchMlaCategoryKpis.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An error occurred';
+        state.error = (action.payload as string) || 'An error occurred';
       })
       // Fetch Village Performance
       .addCase(fetchMlaVillagePerformance.pending, (state) => {
@@ -66,7 +79,7 @@ const mlaSlice = createSlice({
       })
       .addCase(fetchMlaVillagePerformance.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An error occurred';
+        state.error = (action.payload as string) || 'An error occurred';
       })
       // Fetch Mandal Performance
       .addCase(fetchMlaMandalPerformance.pending, (state) => {
@@ -80,7 +93,35 @@ const mlaSlice = createSlice({
       })
       .addCase(fetchMlaMandalPerformance.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string || 'An error occurred';
+        state.error = (action.payload as string) || 'An error occurred';
+      })
+      // Fetch Analytics
+      .addCase(fetchMlaAnalytics.fulfilled, (state, action: PayloadAction<MlaAnalytics>) => {
+        state.analytics = action.payload;
+      })
+      // Fetch Constituency Grievances
+      .addCase(fetchConstituencyGrievances.fulfilled, (state, action) => {
+        if (action.payload && action.payload.length > 0) {
+          state.constituencyGrievances = action.payload;
+        }
+      })
+      // Resolve Grievance
+      .addCase(resolveMlaGrievance.fulfilled, (state, action) => {
+        const index = state.constituencyGrievances.findIndex((g) => g.id === action.payload.id);
+        if (index !== -1) {
+          state.constituencyGrievances[index] = action.payload;
+        }
+        if (state.kpis) {
+          state.kpis.resolved += 1;
+          state.kpis.pending = Math.max(0, state.kpis.pending - 1);
+        }
+      })
+      // Add Comment
+      .addCase(addMlaComment.fulfilled, (state, action) => {
+        const index = state.constituencyGrievances.findIndex((g) => g.id === action.payload.id);
+        if (index !== -1) {
+          state.constituencyGrievances[index] = action.payload;
+        }
       });
   },
 });

@@ -4,12 +4,20 @@ import { useAppSelector, useAppDispatch } from '../../store';
 import { setNewIssueModalOpen } from '../../store/uiSlice';
 import { newsData } from '../../data/newsData';
 
+import { fetchCitizenStats, fetchCitizenGrievances } from '../../store/citizenSlice';
+
 const CitizenDashboard: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { list: issues } = useAppSelector((state) => state.issues);
+  const { stats, grievances: liveCitizenGrievances } = useAppSelector((state) => state.citizen);
+  const { list: fallbackIssues } = useAppSelector((state) => state.issues);
   const { language } = useAppSelector((state) => state.ui);
   const { user } = useAppSelector((state) => state.auth);
+
+  React.useEffect(() => {
+    dispatch(fetchCitizenStats());
+    dispatch(fetchCitizenGrievances());
+  }, [dispatch]);
 
   const feedTranslations = {
     en: {
@@ -62,6 +70,7 @@ const CitizenDashboard: React.FC = () => {
       myIssues: 'My Issues',
       track: 'Track',
       mlaOffice: 'MLA Office',
+      profile: 'Profile',
       announcements: 'Announcements',
       yourVillageStats: 'Your Village Stats',
     },
@@ -115,6 +124,7 @@ const CitizenDashboard: React.FC = () => {
       myIssues: 'నా సమస్యలు',
       track: 'ట్రాక్',
       mlaOffice: 'ఎమ్మెల్యే ఆఫీస్',
+      profile: 'ప్రొఫైల్',
       announcements: 'ప్రకటనలు',
       yourVillageStats: 'మీ గ్రామ గణాంకాలు',
     }
@@ -122,17 +132,15 @@ const CitizenDashboard: React.FC = () => {
 
   const ft = feedTranslations[language];
 
-  const citizenIssues = issues.filter(i => i.reporter === user?.name);
-  const myIssuesCount = citizenIssues.length;
+  const citizenIssues = liveCitizenGrievances && liveCitizenGrievances.length > 0
+    ? liveCitizenGrievances
+    : fallbackIssues.filter(i => i.reporter === user?.name);
+  const myIssuesCount = stats ? stats.myIssuesCount : citizenIssues.length;
 
-  // Dynamic Stats Strip Calculations
-  const baseTotal = 300;
-  const baseResolved = 278;
-
-  const dynamicTotal = baseTotal + issues.length;
-  const dynamicResolved = baseResolved + issues.filter((i) => i.status === 'Resolved').length;
-  const dynamicPending = dynamicTotal - dynamicResolved;
-  const dynamicRate = Math.round((dynamicResolved / dynamicTotal) * 100);
+  const dynamicTotal = stats ? stats.total : (300 + fallbackIssues.length);
+  const dynamicResolved = stats ? stats.resolved : (278 + fallbackIssues.filter(i => i.status === 'Resolved').length);
+  const dynamicPending = stats ? stats.pending : (dynamicTotal - dynamicResolved);
+  const dynamicRate = stats ? Math.round(stats.resolutionRate) : Math.round((dynamicResolved / dynamicTotal) * 100);
 
   const [scope, setScope] = React.useState<'village' | 'constituency'>('constituency');
 
@@ -144,7 +152,7 @@ const CitizenDashboard: React.FC = () => {
       position: 'relative'
     }}>
       {/* Quick Actions Row */}
-      <div className="qa-row d2">
+      <div className="qa-row d2" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
         {/* Raise Issue */}
         <div className="qa" onClick={() => {
           dispatch(setNewIssueModalOpen(true));
@@ -179,6 +187,14 @@ const CitizenDashboard: React.FC = () => {
             <i className="ti ti-phone" aria-hidden="true" style={{ color: '#dc2626' }}></i>
           </div>
           <div className="qa-lbl">{ft.mlaOffice}</div>
+        </div>
+
+        {/* Profile */}
+        <div className="qa" onClick={() => navigate('/profile')}>
+          <div className="qa-ico" style={{ background: '#faf5ff' }}>
+            <i className="ti ti-user" aria-hidden="true" style={{ color: '#9333ea' }}></i>
+          </div>
+          <div className="qa-lbl">{ft.profile}</div>
         </div>
       </div>
 

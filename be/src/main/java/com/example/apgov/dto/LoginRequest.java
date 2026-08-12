@@ -25,4 +25,7 @@ public class LoginRequest {
     
     // Passcode used for MLA (e.g., "2026")
     private String passcode;
+
+    // Optional name passed during citizen mobile onboarding
+    private String name;
 }

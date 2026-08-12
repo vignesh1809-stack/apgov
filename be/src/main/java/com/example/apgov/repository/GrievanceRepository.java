@@ -54,4 +54,23 @@ public interface GrievanceRepository extends JpaRepository<Grievances, String> {
             "WHERE m.constituency_id = :constituencyId " +
             "GROUP BY m.id, m.name", nativeQuery = true)
     List<MlaMandalPerformanceProjection> getMlaMandalPerformance(@Param("constituencyId") String constituencyId);
+    List<Grievances> findByCitizenIdOrderByCreatedAtDesc(String citizenId);
+
+    List<Grievances> findByConstituencyIdOrderByCreatedAtDesc(String constituencyId);
+
+    List<Grievances> findByConstituencyIdAndStatusOrderByCreatedAtDesc(String constituencyId, String status);
+
+    List<Grievances> findByConstituencyIdAndVillageIdOrderByCreatedAtDesc(String constituencyId, String villageId);
+
+    long countByConstituencyIdAndStatus(String constituencyId, String status);
+
+    long countByConstituencyId(String constituencyId);
+
+    long countByVillageId(String villageId);
+
+    long countByVillageIdAndStatus(String villageId, String status);
+
+    long countByCitizenId(String citizenId);
+
+    long countByCitizenIdAndStatus(String citizenId, String status);
 }

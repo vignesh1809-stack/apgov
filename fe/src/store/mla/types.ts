@@ -1,3 +1,5 @@
+import type { CitizenGrievance } from '../citizenSlice';
+
 export interface MlaKpis {
   total: number;
   resolved: number;
@@ -33,9 +35,20 @@ export interface MlaMandalPerformance {
     avgResolutionDays: number;
   };
   status: {
-    performanceLevel: 'EXCELLENT' | 'STABLE' | 'NEEDS_ATTENTION';
+    performanceLevel: 'EXCELLENT' | 'STABLE' | 'NEEDS_ATTENTION' | string;
     colorCode: string;
   };
+}
+
+export interface MlaAnalytics {
+  citizenSatisfactionScore: number;
+  rateImprovementPercentage: number;
+  resolutionRate: number;
+  monthlyTrend: {
+    month: string;
+    raised: number;
+    resolved: number;
+  }[];
 }
 
 export interface MlaState {
@@ -43,6 +56,8 @@ export interface MlaState {
   categoryKpis: MlaCategoryKpi[] | null;
   villagePerformance: MlaVillagePerformance[] | null;
   mandalPerformance: MlaMandalPerformance[] | null;
+  analytics: MlaAnalytics | null;
+  constituencyGrievances: CitizenGrievance[];
   loading: boolean;
   error: string | null;
 }

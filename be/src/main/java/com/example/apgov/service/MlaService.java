@@ -1,9 +1,6 @@
 package com.example.apgov.service;
 
-import com.example.apgov.dto.MlaKpisDto;
-import com.example.apgov.dto.MlaCategoryKpiDto;
-import com.example.apgov.dto.MlaVillagePerformanceDto;
-import com.example.apgov.dto.MlaMandalPerformanceDto;
+import com.example.apgov.dto.*;
 import com.example.apgov.entity.Users;
 import java.util.List;
 
@@ -12,4 +9,8 @@ public interface MlaService {
     List<MlaCategoryKpiDto> getMlaCategoryKpis(Users user);
     List<MlaVillagePerformanceDto> getMlaVillagePerformance(Users user);
     List<MlaMandalPerformanceDto> getMlaMandalPerformance(Users user);
+    MlaAnalyticsDto getMlaAnalytics(Users user);
+    List<CitizenGrievanceDto> getConstituencyGrievances(String villageId, String status, String category, Users user);
+    CitizenGrievanceDto resolveGrievance(String grievanceId, MlaResolveGrievanceRequest request, Users user);
+    CitizenGrievanceDto addComment(String grievanceId, MlaCommentRequest request, Users user);
 }

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useAppSelector, useAppDispatch } from '../store';
 import { toggleNotifications, markNotificationsRead } from '../store/uiSlice';
+import { logout } from '../store/authSlice';
 import BottomNav from './BottomNav';
 import { translations } from '../i18n/translations';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 
 interface PhoneFrameProps {
   children?: React.ReactNode;
@@ -11,6 +12,7 @@ interface PhoneFrameProps {
 
 const PhoneFrame: React.FC<PhoneFrameProps> = ({ children }) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { user } = useAppSelector((state) => state.auth);
   const { notifications, showNotifications } = useAppSelector((state) => state.ui);
   const { language } = useAppSelector((state) => state.ui);
@@ -149,25 +151,49 @@ const PhoneFrame: React.FC<PhoneFrameProps> = ({ children }) => {
           user?.role === 'citizen' ? (
             <div className="citizen-topbar d1">
               <div className="trow">
-                <div>
+                <div style={{ cursor: 'pointer' }} onClick={() => navigate('/profile')}>
                   <div className="greet">{language === 'te' ? 'నమస్కారం · శుభోదయం' : 'Namaskaram · Good morning'}</div>
                   <div className="uname" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <i className="ti ti-user-circle" style={{ fontSize: '18px', color: 'var(--gold-dark)', opacity: 0.9 }} aria-hidden="true"></i>
-                    <span>{user?.name}</span>
+                    <span>{user?.name || (language === 'te' ? 'పౌరుడు' : 'Citizen')}</span>
                   </div>
                 </div>
-                <button
-                  className="bell"
-                  aria-label="Notifications"
-                  onClick={handleNotifClick}
-                >
-                  <i className="ti ti-bell" aria-hidden="true"></i>
-                  {unreadCount > 0 && <div className="bell-badge">{unreadCount}</div>}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    className="bell"
+                    aria-label="Profile"
+                    title={language === 'te' ? 'ప్రొఫైల్' : 'My Profile'}
+                    onClick={() => navigate('/profile')}
+                    style={{ background: '#fffde7', border: '1px solid rgba(204,153,0,0.2)' }}
+                  >
+                    <i className="ti ti-user" style={{ color: 'var(--gold-dark)' }} aria-hidden="true"></i>
+                  </button>
+                  <button
+                    className="bell"
+                    aria-label="Notifications"
+                    onClick={handleNotifClick}
+                  >
+                    <i className="ti ti-bell" aria-hidden="true"></i>
+                    {unreadCount > 0 && <div className="bell-badge">{unreadCount}</div>}
+                  </button>
+                  <button
+                    className="bell"
+                    aria-label="Sign Out"
+                    title={language === 'te' ? 'లాగ్ అవుట్' : 'Sign Out'}
+                    onClick={() => {
+                      if (window.confirm(t.confirmSignOut)) {
+                        dispatch(logout());
+                      }
+                    }}
+                    style={{ background: '#fef2f2', border: '1px solid #fee2e2' }}
+                  >
+                    <i className="ti ti-logout" style={{ color: '#dc2626' }} aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '6px' }}>
-                <div className="vchip">
+                <div className="vchip" style={{ cursor: 'pointer' }} onClick={() => navigate('/profile')}>
                   <i className="ti ti-map-pin" aria-hidden="true"></i>
                   {getTranslatedVillage(user?.designation?.split(' · ')[1] || 'Kuppam')} · {language === 'te' ? 'చిత్తూరు' : 'Chittoor'}
                 </div>
@@ -180,14 +206,29 @@ const PhoneFrame: React.FC<PhoneFrameProps> = ({ children }) => {
                   <div className="greeting">{t.greeting}</div>
                   <div className="mla-name">{getTranslatedMlaName(user?.name)}</div>
                 </div>
-                <button
-                  className="notif-btn"
-                  aria-label="Notifications"
-                  onClick={handleNotifClick}
-                >
-                  <i className="ti ti-bell" aria-hidden="true"></i>
-                  {unreadCount > 0 && <span className="notif-badge" />}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <button
+                    className="notif-btn"
+                    aria-label="Notifications"
+                    onClick={handleNotifClick}
+                  >
+                    <i className="ti ti-bell" aria-hidden="true"></i>
+                    {unreadCount > 0 && <span className="notif-badge" />}
+                  </button>
+                  <button
+                    className="notif-btn"
+                    aria-label="Sign Out"
+                    title={language === 'te' ? 'లాగ్ అవుట్' : 'Sign Out'}
+                    onClick={() => {
+                      if (window.confirm(t.confirmSignOut)) {
+                        dispatch(logout());
+                      }
+                    }}
+                    style={{ background: '#fef2f2' }}
+                  >
+                    <i className="ti ti-logout" style={{ color: '#dc2626' }} aria-hidden="true"></i>
+                  </button>
+                </div>
               </div>
               <div className="const-chip">
                 <i className="ti ti-map-pin" aria-hidden="true"></i>
@@ -237,8 +278,8 @@ const PhoneFrame: React.FC<PhoneFrameProps> = ({ children }) => {
           {children}
         </div>
 
-        {/* Glassmorphism Floating Bottom Nav (Only for MLA/Official) */}
-        {user?.role !== 'citizen' && user?.role !== 'fieldofficer' && user?.role !== 'coordinator' && <BottomNav />}
+        {/* Glassmorphism Floating Bottom Nav (For MLA and Citizen) */}
+        {user?.role !== 'fieldofficer' && user?.role !== 'coordinator' && <BottomNav />}
 
         {/* Field Officer Bottom Nav (Fixed) */}
         {user?.role === 'fieldofficer' && currentScreen !== 'detail' && (

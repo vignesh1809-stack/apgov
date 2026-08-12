@@ -13,12 +13,27 @@ import COFieldOfficers from './pages/COFieldOfficers';
 import COIssueDetail from './pages/COIssueDetail';
 import COReports from './pages/COReports';
 
+import {
+  fetchCoordinatorKpis,
+  fetchCoordinatorGrievances,
+  fetchCoordinatorFieldOfficers,
+  fetchCoordinatorReports,
+  assignGrievanceToFO,
+} from '../../store/coordinatorSlice';
+
 const CoordinatorPortal: React.FC = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state) => state.auth);
   const { notifications, showNotifications, language } = useAppSelector((state) => state.ui);
   const t = translations[language];
   const [searchParams, setSearchParams] = useSearchParams();
+
+  React.useEffect(() => {
+    dispatch(fetchCoordinatorKpis());
+    dispatch(fetchCoordinatorGrievances());
+    dispatch(fetchCoordinatorFieldOfficers());
+    dispatch(fetchCoordinatorReports());
+  }, [dispatch]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
@@ -289,6 +304,16 @@ const CoordinatorPortal: React.FC = () => {
           };
         }
         return fo;
+      })
+    );
+
+    // Dispatch assignment to backend Coordinator Microservice API
+    dispatch(
+      assignGrievanceToFO({
+        grievanceId: selectedIssueForAssign.id,
+        fieldOfficerId: selectedFoId,
+        stopSequence: 1,
+        notes: `Assigned by Coordinator ${user?.name || ''}`,
       })
     );
 

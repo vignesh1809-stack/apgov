@@ -460,26 +460,37 @@ const Login: React.FC = () => {
             </div>
 
             {/* Buttons */}
-            <div style={{ marginTop: '20px' }}>
-              <button className="login-btn" onClick={() => setLoginMode('citizen-phone')} style={{ width: '100%', padding: '12px 14px', background: '#FFD700', border: 'none', borderRadius: '16px', color: '#663300', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>
+            <div style={{ marginTop: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button 
+                className="login-btn" 
+                onClick={() => setLoginMode('citizen-phone')} 
+                style={{ 
+                  width: '100%', 
+                  padding: '13px 14px', 
+                  background: 'linear-gradient(90deg, #FFD700 0%, #FFC107 100%)', 
+                  border: 'none', 
+                  borderRadius: '16px', 
+                  color: '#663300', 
+                  fontSize: '13.5px', 
+                  fontWeight: '800', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  boxShadow: '0 3px 10px rgba(255, 215, 0, 0.3)'
+                }}
+              >
+                <i className="ti ti-device-mobile" aria-hidden="true" style={{ fontSize: '17px' }}></i>
                 {t.loginMobileBtn}
               </button>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', margin: '12px 0' }}>
-                <div style={{ flex: 1, height: '1px', background: '#f0f0f0' }}></div>
-                <span style={{ fontSize: '11px', color: '#bbb' }}>{t.orText}</span>
-                <div style={{ flex: 1, height: '1px', background: '#f0f0f0' }}></div>
-              </div>
-              <button className="login-btn" onClick={() => setLoginMode('citizen-phone')} style={{ width: '100%', padding: '11px 14px', background: '#fff', border: '1.5px solid #FFD700', borderRadius: '16px', color: '#CC9900', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginTop: 0 }}>
-                <i className="ti ti-id-badge" aria-hidden="true" style={{ fontSize: '15px', marginRight: '6px', verticalAlign: '-1px' }}></i>
-                {t.loginAadhaarBtn}
-              </button>
               
-              <button className="login-btn" onClick={() => setLoginMode('field-officer')} style={{ width: '100%', padding: '11px 14px', background: '#fff', border: '1.5px solid #FFD700', borderRadius: '16px', color: '#CC9900', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' }}>
+              <button className="login-btn" onClick={() => setLoginMode('field-officer')} style={{ width: '100%', padding: '11px 14px', background: '#fff', border: '1.5px solid #FFD700', borderRadius: '16px', color: '#CC9900', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                 <i className="ti ti-shield-check" aria-hidden="true" style={{ fontSize: '15px', marginRight: '6px', verticalAlign: '-1px' }}></i>
                 {t.fieldOfficerLoginBtn}
               </button>
               
-              <button className="login-btn" onClick={() => setLoginMode('coordinator')} style={{ width: '100%', padding: '11px 14px', background: '#fff', border: '1.5px solid #FFD700', borderRadius: '16px', color: '#CC9900', fontSize: '13px', fontWeight: '600', cursor: 'pointer', marginTop: '10px' }}>
+              <button className="login-btn" onClick={() => setLoginMode('coordinator')} style={{ width: '100%', padding: '11px 14px', background: '#fff', border: '1.5px solid #FFD700', borderRadius: '16px', color: '#CC9900', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>
                 <i className="ti ti-users" aria-hidden="true" style={{ fontSize: '15px', marginRight: '6px', verticalAlign: '-1px' }}></i>
                 {t.coordinatorLoginBtn}
               </button>
@@ -709,6 +720,14 @@ const Login: React.FC = () => {
         {loginMode === 'citizen-loc' && (
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: 'calc(100% - 70px)', background: '#f8f8f8', justifyContent: 'space-between' }}>
             <div style={{ background: '#fff', padding: '12px 18px 14px', borderBottom: '1px solid #f0f0f0', flexShrink: 0 }}>
+              <div 
+                className="back-row" 
+                onClick={() => setLoginMode('citizen-otp')} 
+                style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginBottom: '10px' }}
+              >
+                <i className="ti ti-arrow-left" style={{ fontSize: '18px', color: '#111' }}></i>
+                <span style={{ fontSize: '13px', fontWeight: '600' }}>{t.back}</span>
+              </div>
               <div style={{ fontSize: '9px', color: '#bbb', fontWeight: '700', letterSpacing: '0.8px', textTransform: 'uppercase', marginBottom: '4px' }}>
                 {t.stepProgress}
               </div>
@@ -716,7 +735,7 @@ const Login: React.FC = () => {
                 {t.selectLocationTitle}
               </div>
               <div className="telugu-sub" style={{ fontSize: '11px', marginTop: '2px' }}>
-                మీ స్థానం ఎంచుకోండి
+                {language === 'te' ? 'మీ స్థానం ఎంచుకోండి' : 'Choose your resident village'}
               </div>
               <div className="progress-bar" style={{ display: 'flex', gap: '4px', marginTop: '10px' }}>
                 <div className="prog-dot done" style={{ flex: 1, height: '4px', borderRadius: '2px', background: '#FFD700' }}></div>

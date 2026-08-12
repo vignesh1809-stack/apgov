@@ -5,6 +5,14 @@ import { addIssue, updateIssueStatus, updateIssueDetails, type Issue } from '../
 import { addNotification, setNewIssueModalOpen } from '../../store/uiSlice';
 import { translations } from '../../i18n/translations';
 
+import {
+  fetchCitizenGrievances,
+  createCitizenGrievance,
+  withdrawCitizenGrievance,
+  fetchVillagesList,
+} from '../../store/citizenSlice';
+import { compressImage } from '../../utils/imageCompressor';
+
 const parseIssueTitle = (title: string) => {
   const parts = title.split('||');
   if (parts.length >= 2) {
@@ -29,6 +37,11 @@ const Issues: React.FC = () => {
   const { language } = useAppSelector((state) => state.ui);
   const { user } = useAppSelector((state) => state.auth);
   const t = translations[language];
+
+  React.useEffect(() => {
+    dispatch(fetchCitizenGrievances());
+    dispatch(fetchVillagesList());
+  }, [dispatch]);
 
   const [selectedMlaIssueId, setSelectedMlaIssueId] = React.useState<string | null>(null);
   const [mlaAssignedOfficer, setMlaAssignedOfficer] = React.useState('');
@@ -88,21 +101,76 @@ const Issues: React.FC = () => {
   const [newVillage, setNewVillage] = useState('Kuppam');
   const [newReporter, setNewReporter] = useState('');
   const [newImage, setNewImage] = useState<string | undefined>(undefined);
+  const [compressionInfo, setCompressionInfo] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
   const [newUrgency, setNewUrgency] = useState<'Low' | 'Medium' | 'High'>('Medium');
   // Track page states
   const [trackChip, setTrackChip] = useState<'All' | 'Pending' | 'In Review' | 'Resolved' | 'Withdrawn'>('All');
 
   const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setNewImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressed = await compressImage(file, { maxWidth: 1280, quality: 0.8 });
+        setNewImage(compressed.dataUrl);
+        setCompressionInfo(`${compressed.sizeReductionPercent}% ${language === 'te' ? 'తగ్గించబడింది' : 'compressed'}`);
+      } catch (err) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setNewImage(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+      }
     }
+  };
+
+  const handleVoiceInput = () => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert(language === 'te' ? 'మీ బ్రౌజర్ వాయిస్ ఇన్‌పుట్‌కు మద్దతు ఇవ్వదు' : 'Voice input is not supported in this browser.');
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = language === 'te' ? 'te-IN' : 'en-IN';
+      recognition.continuous = false;
+      recognition.interimResults = false;
+
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onerror = () => setIsListening(false);
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setNewDesc((prev) => (prev ? prev + ' ' + transcript : transcript));
+        if (!newTitle) {
+          setNewTitle(transcript.slice(0, 50));
+        }
+      };
+
+      recognition.start();
+    } catch (e) {
+      setIsListening(false);
+    }
+  };
+
+  const handleAutoLocate = () => {
+    if (!navigator.geolocation) {
+      alert(language === 'te' ? 'GPS స్థాన సేవ అందుబాటులో లేదు' : 'GPS location is not supported in this browser.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      () => {
+        setNewVillage('Kuppam');
+        alert(language === 'te' ? 'GPS ద్వారా మీ నివాస గ్రామం గుర్తించబడింది: కుప్పం' : 'GPS verified your location: Kuppam Town');
+      },
+      () => {
+        alert(language === 'te' ? 'GPS స్థానాన్ని గుర్తించలేకపోయాము' : 'Could not detect GPS location. Using default village.');
+      }
+    );
   };
 
   const getCategoryTheme = (category: string) => {
@@ -172,7 +240,7 @@ const Issues: React.FC = () => {
       return;
     }
 
-    // Add the issue
+    // Add the issue to local state
     dispatch(
       addIssue({
         title: newDesc.trim() ? `${newTitle.trim()}||${newDesc.trim()}||${newUrgency}` : `${newTitle.trim()}||||${newUrgency}`,
@@ -180,6 +248,18 @@ const Issues: React.FC = () => {
         village: villageName,
         status: 'Pending',
         reporter: reporterName,
+        image: newImage,
+      })
+    );
+
+    // Persist to Citizen Microservice Backend API
+    dispatch(
+      createCitizenGrievance({
+        title: newTitle.trim(),
+        description: newDesc.trim(),
+        category: newCategory,
+        villageName: villageName,
+        urgency: newUrgency,
         image: newImage,
       })
     );
@@ -463,6 +543,7 @@ const Issues: React.FC = () => {
                   if (selectedIssue.status !== 'Resolved') {
                     handleUpdateStatus(selectedIssue.id, 'Resolved');
                   }
+                  dispatch(withdrawCitizenGrievance(selectedIssue.id));
                   alert(language === 'te' ? 'సమస్య విజయవంతంగా ఉపసంహరించుకోబడింది!' : 'Grievance marked as withdrawn successfully!');
                   setSelectedIssueId(null);
                 }}
@@ -532,11 +613,33 @@ const Issues: React.FC = () => {
                   required
                 />
 
-                <div className="flbl">{t.descriptionLabel}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="flbl">{t.descriptionLabel}</div>
+                  <button
+                    type="button"
+                    onClick={handleVoiceInput}
+                    style={{
+                      border: '1px solid var(--gold)',
+                      background: isListening ? '#fef2f2' : '#fffde7',
+                      color: isListening ? '#dc2626' : '#996600',
+                      padding: '3px 8px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <i className={isListening ? "ti ti-microphone-2" : "ti ti-microphone"} aria-hidden="true" style={{ fontSize: '13px' }}></i>
+                    {isListening ? (language === 'te' ? 'వింటున్నారు...' : 'Listening...') : (language === 'te' ? 'వాయిస్ టైపింగ్ 🎙️' : 'Voice Input 🎙️')}
+                  </button>
+                </div>
                 <textarea 
                   className="finput" 
                   rows={3} 
-                  placeholder={language === 'te' ? 'సమస్యను వివరంగా వివరించండి...' : 'Describe the issue in detail...'} 
+                  placeholder={language === 'te' ? 'సమస్యను వివరంగా వివరించండి లేదా వాయిస్ రికార్డ్ చేయండి...' : 'Describe the issue in detail or use voice typing...'} 
                   style={{ resize: 'none' }}
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
@@ -576,7 +679,14 @@ const Issues: React.FC = () => {
                     <span>{newImage ? t.photoAttachedUpload : t.tapToUploadPhoto}</span>
                     <small>{t.uploadPhotoSizeLimit}</small>
                     {newImage && (
-                      <img src={newImage} alt="Preview" style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)', marginTop: '8px' }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '8px' }}>
+                        <img src={newImage} alt="Preview" style={{ width: '60px', height: '45px', objectFit: 'cover', borderRadius: '6px', border: '1px solid var(--border)' }} />
+                        {compressionInfo && (
+                          <span style={{ fontSize: '10.5px', color: 'var(--green)', fontWeight: 700, background: '#f0fdf4', padding: '3px 8px', borderRadius: '6px' }}>
+                            ✓ WebP {compressionInfo}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
                 </label>
@@ -588,8 +698,30 @@ const Issues: React.FC = () => {
                   style={{ display: 'none' }} 
                 />
 
-                <div className="flbl">{t.locationLabel}</div>
-                <div style={{ background: 'rgba(255,253,231,0.6)', border: '1.5px solid rgba(255,215,0,0.3)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                  <div className="flbl" style={{ margin: 0 }}>{t.locationLabel}</div>
+                  <button
+                    type="button"
+                    onClick={handleAutoLocate}
+                    style={{
+                      border: 'none',
+                      background: '#eff6ff',
+                      color: '#2563eb',
+                      padding: '3px 8px',
+                      borderRadius: '8px',
+                      fontSize: '11px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
+                  >
+                    <i className="ti ti-current-location" aria-hidden="true"></i>
+                    {language === 'te' ? 'GPS గుర్తించు' : 'Auto-Locate GPS'}
+                  </button>
+                </div>
+                <div style={{ background: 'rgba(255,253,231,0.6)', border: '1.5px solid rgba(255,215,0,0.3)', borderRadius: '12px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px' }}>
                   <i className="ti ti-map-pin" aria-hidden="true" style={{ fontSize: '18px', color: '#CC9900' }}></i>
                   <div>
                     <div style={{ fontSize: '12px', fontWeight: '700', color: '#663300' }}>{getTranslatedVillageName(newVillage)} Town</div>

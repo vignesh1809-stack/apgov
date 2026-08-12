@@ -41,14 +41,14 @@ const MlaDashboard: React.FC = () => {
   const baseAcknowledged = 180;
   const baseEnRoute = 63;
 
-  const dynamicTotal = baseTotal + issues.length;
-  const dynamicResolved = baseResolved + issues.filter((i) => i.status === 'Resolved').length;
-  const dynamicPending = basePending + issues.filter((i) => i.status === 'Pending').length;
-  const dynamicVisited = baseVisited + issues.filter((i) => (i.status as string) === 'Visited').length;
-  const dynamicAcknowledged = baseAcknowledged + issues.filter((i) => (i.status as string) === 'Acknowledged').length;
-  const dynamicEnRoute = baseEnRoute + issues.filter((i) => (i.status as string) === 'EnRoute' || (i.status as string) === 'En route').length;
+  const dynamicTotal = kpis ? kpis.total : (baseTotal + issues.length);
+  const dynamicResolved = kpis ? kpis.resolved : (baseResolved + issues.filter((i) => i.status === 'Resolved').length);
+  const dynamicPending = kpis ? kpis.pending : (basePending + issues.filter((i) => i.status === 'Pending').length);
+  const dynamicVisited = kpis ? kpis.visited : (baseVisited + issues.filter((i) => (i.status as string) === 'Visited').length);
+  const dynamicAcknowledged = kpis ? kpis.acknowledged : (baseAcknowledged + issues.filter((i) => (i.status as string) === 'Acknowledged').length);
+  const dynamicEnRoute = kpis ? kpis.enroute : (baseEnRoute + issues.filter((i) => (i.status as string) === 'EnRoute' || (i.status as string) === 'En route').length);
 
-  const resolutionRate = ((dynamicResolved / dynamicTotal) * 100).toFixed(1);
+  const resolutionRate = kpis ? kpis.resolutionRate.toFixed(1) : ((dynamicResolved / dynamicTotal) * 100).toFixed(1);
 
   // Category counts
   const categories = [

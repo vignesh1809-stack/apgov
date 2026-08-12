@@ -114,7 +114,12 @@ CREATE TABLE grievance_timelines (
 CREATE SPATIAL INDEX idx_constituencies_boundary ON constituencies (boundary);
 CREATE SPATIAL INDEX idx_villages_boundary ON villages (boundary);
 
--- Standard Indexes for performance
+-- Standard & Compound Indexes for Government Scale Query Performance (100k DAU)
 CREATE INDEX idx_grievances_status_urgency ON grievances (status, urgency);
 CREATE INDEX idx_grievances_constituency ON grievances (constituency_id);
+CREATE INDEX idx_grievances_citizen_created ON grievances (citizen_id, created_at DESC);
+CREATE INDEX idx_grievances_const_status_urgency ON grievances (constituency_id, status, urgency, created_at DESC);
+CREATE INDEX idx_grievances_village_status ON grievances (village_id, status);
 CREATE INDEX idx_grievance_assignments_dispatch ON grievance_assignments (field_officer_id, assignment_date, stop_sequence);
+CREATE INDEX idx_users_phone_role ON users (phone, role);
+

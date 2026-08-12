@@ -1,11 +1,18 @@
-import React from 'react';
-import { useAppSelector } from '../../store';
+import React, { useEffect } from 'react';
+import { useAppSelector, useAppDispatch } from '../../store';
 import { translations } from '../../i18n/translations';
+import { fetchMlaAnalytics, selectMlaAnalytics } from '../../store/mla';
 
 const Analytics: React.FC = () => {
+  const dispatch = useAppDispatch();
+  const liveAnalytics = useAppSelector(selectMlaAnalytics);
   const { list: issues } = useAppSelector((state) => state.issues);
   const { language } = useAppSelector((state) => state.ui);
   const t = translations[language];
+
+  useEffect(() => {
+    dispatch(fetchMlaAnalytics());
+  }, [dispatch]);
 
   const getTranslatedVillageName = (name: string) => {
     if (name === 'Kuppam') return t.kuppam;
@@ -16,20 +23,20 @@ const Analytics: React.FC = () => {
     return name;
   };
 
-  // Dynamic calculations based on base numbers + issues list
+  // Dynamic calculations based on live backend analytics or fallback
   const baseTotal = 1243;
   const baseResolved = 875;
 
   const dynamicTotal = baseTotal + issues.length;
   const dynamicResolved = baseResolved + issues.filter((i) => i.status === 'Resolved').length;
 
-  const resolutionRateVal = parseFloat(((dynamicResolved / dynamicTotal) * 100).toFixed(1));
+  const resolutionRateVal = liveAnalytics ? liveAnalytics.resolutionRate : parseFloat(((dynamicResolved / dynamicTotal) * 100).toFixed(1));
 
-  // Dynamic satisfaction score (starts at 4.2 stars, increases with resolution rate)
-  const satisfactionVal = (4.2 + (resolutionRateVal - 70.2) * 0.04).toFixed(1);
+  // Dynamic satisfaction score
+  const satisfactionVal = liveAnalytics ? liveAnalytics.citizenSatisfactionScore.toFixed(1) : (4.2 + (resolutionRateVal - 70.2) * 0.04).toFixed(1);
 
   // Dynamic improvement percentage
-  const improvementVal = Math.round(18 + (resolutionRateVal - 70.2) * 0.5);
+  const improvementVal = liveAnalytics ? Math.round(liveAnalytics.rateImprovementPercentage) : Math.round(18 + (resolutionRateVal - 70.2) * 0.5);
 
   // Village stats (reused from Dashboard calculations to stay consistent)
   const villages = [

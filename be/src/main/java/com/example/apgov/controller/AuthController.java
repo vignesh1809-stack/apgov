@@ -23,11 +23,19 @@ public class AuthController {
 
     private final CustomUserDetailsService userDetailsService;
     private final JwtService jwtService;
+    private final com.example.apgov.repository.UserRepository userRepository;
+    private final com.example.apgov.repository.ConstituencyRepository constituencyRepository;
 
     @Autowired
-    public AuthController(CustomUserDetailsService userDetailsService, JwtService jwtService) {
+    public AuthController(
+            CustomUserDetailsService userDetailsService,
+            JwtService jwtService,
+            com.example.apgov.repository.UserRepository userRepository,
+            com.example.apgov.repository.ConstituencyRepository constituencyRepository) {
         this.userDetailsService = userDetailsService;
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.constituencyRepository = constituencyRepository;
     }
 
     @PostMapping("/login")
@@ -60,7 +68,7 @@ public class AuthController {
             } 
             // 3. Citizen / MLA Login via Phone Number
             else if (request.getPhone() != null && !request.getPhone().isBlank()) {
-                userDetails = loadUserByPhoneOrFormattedPhone(request.getPhone());
+                userDetails = loadUserByPhoneOrAutoCreate(request.getPhone(), request.getName());
                 Users user = ((CustomUserDetails) userDetails).getUser();
                 
                 if ("mla".equalsIgnoreCase(user.getRole())) {
@@ -214,7 +222,7 @@ public class AuthController {
         }
     }
 
-    private UserDetails loadUserByPhoneOrFormattedPhone(String phone) {
+    private UserDetails loadUserByPhoneOrAutoCreate(String phone, String name) {
         String cleanPhone = phone.replaceAll("\\s+", ""); // remove spaces
         try {
             return userDetailsService.loadUserByPhone(cleanPhone);
@@ -234,7 +242,27 @@ public class AuthController {
                     // Ignore
                 }
             }
-            throw e; // Rethrow original if still not found
+
+            // Auto-provision new citizen profile on-the-fly for phone login
+            String citizenName = (name != null && !name.isBlank()) ? name.trim() : "Citizen";
+            String[] parts = citizenName.split("\\s+", 2);
+            String firstName = parts[0];
+            String lastName = parts.length > 1 ? parts[1] : "Kuppam";
+
+            com.example.apgov.entity.Constituencies defaultConstituency = constituencyRepository.findAll().stream().findFirst().orElse(null);
+
+            Users newCitizen = Users.builder()
+                    .id(java.util.UUID.randomUUID().toString())
+                    .ssoUid("phone-" + cleanPhone)
+                    .firstName(firstName)
+                    .lastName(lastName)
+                    .phone(cleanPhone.startsWith("+91") ? cleanPhone : "+91" + cleanPhone)
+                    .role("citizen")
+                    .constituency(defaultConstituency)
+                    .build();
+
+            Users savedCitizen = userRepository.save(newCitizen);
+            return new CustomUserDetails(savedCitizen);
         }
     }
 }

@@ -7,6 +7,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Start#123}
       MYSQL_DATABASE: apgov
+    ports:
+      - "3306:3306"
     volumes:
       - apgov_mysql_data:/var/lib/mysql
     networks:
@@ -39,8 +41,8 @@ services:
   # ─── React Frontend + Nginx Gateway ────────────────────────────────────────
   frontend:
     build:
-      context: .
-      dockerfile: fe/Dockerfile
+      context: ./fe
+      dockerfile: Dockerfile
     container_name: apgov-frontend
     restart: unless-stopped
     ports:

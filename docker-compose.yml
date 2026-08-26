@@ -1,0 +1,59 @@
+services:
+  # ─── Database ───────────────────────────────────────────────────────────────
+  mysql:
+    image: mysql:8.0
+    container_name: apgov-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-Start#123}
+      MYSQL_DATABASE: apgov
+    volumes:
+      - apgov_mysql_data:/var/lib/mysql
+    networks:
+      - apgov-network
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  # ─── Spring Boot Backend ───────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./be
+      dockerfile: Dockerfile
+    container_name: apgov-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/apgov?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD:-Start#123}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - apgov-network
+
+  # ─── React Frontend + Nginx Gateway ────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: fe/Dockerfile
+    container_name: apgov-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"   # Maps port 3000 on Azure VM to Port 80 inside container
+    depends_on:
+      - backend
+    networks:
+      - apgov-network
+
+volumes:
+  apgov_mysql_data:
+    driver: local
+
+networks:
+  apgov-network:
+    driver: bridge

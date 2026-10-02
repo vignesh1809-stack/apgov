@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom
 import { Provider } from 'react-redux';
 import { store } from './store';
 import ProtectedRoute from './components/ProtectedRoute';
-import PhoneFrame from './components/PhoneFrame';
+import AppShell from './components/AppShell';
 import RouteLoadingFallback from './components/RouteLoadingFallback';
 
 // Route Code-Splitting / Dynamic Imports for 100k DAU performance
@@ -20,11 +20,11 @@ const VillagesList = lazy(() => import('./pages/mla/VillagesList'));
 
 const AppLayout: React.FC = () => {
   return (
-    <PhoneFrame>
+    <AppShell>
       <Suspense fallback={<RouteLoadingFallback />}>
         <Outlet />
       </Suspense>
-    </PhoneFrame>
+    </AppShell>
   );
 };
 

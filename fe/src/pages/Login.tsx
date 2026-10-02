@@ -218,7 +218,7 @@ const Login: React.FC = () => {
     <div style={{
       display: 'flex',
       justifyContent: 'flex-end',
-      padding: '12px 16px 0',
+      padding: 'max(14px, env(safe-area-inset-top, 14px)) 16px 0',
       width: '100%',
       boxSizing: 'border-box'
     }}>
@@ -271,19 +271,8 @@ const Login: React.FC = () => {
   );
 
   return (
-    <div className="phone-wrap" style={{ background: '#fff' }}>
-      <div className="phone-inner">
-        {/* Status Bar */}
-        <div className="status-bar">
-          <span className="status-time">9:41</span>
-          <div className="status-icons">
-            <i className="ti ti-signal-4g" aria-hidden="true"></i>
-            <i className="ti ti-wifi" aria-hidden="true"></i>
-            <i className="ti ti-battery-2" aria-hidden="true"></i>
-          </div>
-        </div>
-
-        {renderLanguageSelector()}
+    <div className="app-shell login-shell">
+      {renderLanguageSelector()}
 
         {/* 1. MLA LOGIN SCREEN */}
         {loginMode === 'mla' && (
@@ -1222,7 +1211,6 @@ const Login: React.FC = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

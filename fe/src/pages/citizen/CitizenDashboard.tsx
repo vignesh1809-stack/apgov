@@ -152,7 +152,7 @@ const CitizenDashboard: React.FC = () => {
       position: 'relative'
     }}>
       {/* Quick Actions Row */}
-      <div className="qa-row d2" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
+      <div className="qa-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
         {/* Raise Issue */}
         <div className="qa" onClick={() => {
           dispatch(setNewIssueModalOpen(true));
@@ -198,14 +198,14 @@ const CitizenDashboard: React.FC = () => {
         </div>
       </div>
 
-      <div className="sec-hdr d3">
+      <div className="sec-hdr">
         <div className="sec-left">
           <div className="sec-bar"></div>
           <div className="sec-ttl">{ft.yourVillageStats}</div>
         </div>
       </div>
 
-      <div className="stats-strip d3">
+      <div className="stats-strip">
         <div className="ss">
           <div className="ss-n" style={{ color: '#111' }}>{dynamicTotal}</div>
           <div className="ss-l">{ft.total}</div>
@@ -225,7 +225,7 @@ const CitizenDashboard: React.FC = () => {
       </div>
 
       {/* Feed Switcher */}
-      <div className="tog-wrap d4">
+      <div className="tog-wrap">
         <div className="tog-pill">
           <button className={`tog-b ${scope === 'village' ? 'on' : ''}`} onClick={() => setScope('village')}>
             {language === 'te' ? 'మీ గ్రామం' : 'Your Village'}
@@ -239,7 +239,7 @@ const CitizenDashboard: React.FC = () => {
       {/* Feeds */}
       {scope === 'village' ? (
         <div id="fv" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div className="sec-hdr d4">
+          <div className="sec-hdr">
             <div className="sec-left">
               <div className="sec-bar"></div>
               <div className="sec-ttl">{ft.fromMlaOffice}</div>
@@ -247,7 +247,7 @@ const CitizenDashboard: React.FC = () => {
             <span className="sec-cnt">{ft.pinned}</span>
           </div>
 
-          <div className="mla-card d5">
+          <div className="mla-card">
             <div className="mla-av">CB</div>
             <div>
               <div className="mla-nm">Sri Chandrababu Naidu <span className="mla-chip">MLA</span></div>
@@ -256,7 +256,7 @@ const CitizenDashboard: React.FC = () => {
             </div>
           </div>
 
-          <div className="sec-hdr d5">
+          <div className="sec-hdr">
             <div className="sec-left">
               <div className="sec-bar"></div>
               <div className="sec-ttl">{ft.villageNews}</div>
@@ -264,8 +264,8 @@ const CitizenDashboard: React.FC = () => {
             <button className="see-all-btn" onClick={() => navigate('/news?scope=village')}>{ft.seeAll}</button>
           </div>
 
-          {newsData.filter(item => item.scope === 'village').map((item, idx) => (
-            <div key={item.id} className={`nc d${5 + idx}`} onClick={() => navigate(`/news/${item.id}`)}>
+          {newsData.filter(item => item.scope === 'village').map((item) => (
+            <div key={item.id} className="nc" onClick={() => navigate(`/news/${item.id}`)}>
               <div className="nc-accent" style={{ background: '#CC9900' }}></div>
               <div className="nc-inner">
                 <div className="nc-ico" style={{ background: '#fffde7' }}>
@@ -276,7 +276,7 @@ const CitizenDashboard: React.FC = () => {
                   <div className="nc-title">{language === 'te' ? item.title.te : item.title.en}</div>
                   <div className="nc-meta">
                     <i className="ti ti-clock" aria-hidden="true"></i>
-                    {language === 'te' ? item.date.te : item.date.en} · {language === 'te' ? item.location.te : item.location.en} {idx === 0 && <span className="nc-new">{language === 'te' ? 'కొత్తది' : 'NEW'}</span>}
+                    {language === 'te' ? item.date.te : item.date.en} · {language === 'te' ? item.location.te : item.location.en}
                   </div>
                 </div>
               </div>
@@ -285,7 +285,7 @@ const CitizenDashboard: React.FC = () => {
         </div>
       ) : (
         <div id="fc" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <div className="sec-hdr d4">
+          <div className="sec-hdr">
             <div className="sec-left">
               <div className="sec-bar"></div>
               <div className="sec-ttl">{ft.constituencyNews}</div>
@@ -293,8 +293,8 @@ const CitizenDashboard: React.FC = () => {
             <button className="see-all-btn" onClick={() => navigate('/news?scope=constituency')}>{ft.seeAll}</button>
           </div>
 
-          {newsData.filter(item => item.scope === 'constituency').map((item, idx) => (
-            <div key={item.id} className={`nc d${5 + idx}`} onClick={() => navigate(`/news/${item.id}`)}>
+          {newsData.filter(item => item.scope === 'constituency').map((item) => (
+            <div key={item.id} className="nc" onClick={() => navigate(`/news/${item.id}`)}>
               <div className="nc-accent" style={{ background: '#CC9900' }}></div>
               <div className="nc-inner">
                 <div className="nc-ico" style={{ background: '#fffde7' }}>

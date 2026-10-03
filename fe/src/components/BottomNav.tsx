@@ -8,11 +8,12 @@ const BottomNav: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const t = translations[language];
 
-  const navItems = user?.role === 'citizen' ? [
-    { path: '/dashboard', label: t.navHome, icon: 'ti ti-layout-dashboard' },
-    { path: '/issues', label: t.navRaiseIssue, icon: 'ti ti-edit-circle' },
-    { path: '/profile', label: t.navProfile, icon: 'ti ti-user' },
-  ] : [
+  // Down nav removed for citizen
+  if (user?.role === 'citizen') {
+    return null;
+  }
+
+  const navItems = [
     { path: '/dashboard', label: t.navDashboard, icon: 'ti ti-layout-dashboard' },
     { path: '/map', label: t.navMap, icon: 'ti ti-map-pin' },
     { path: '/issues', label: t.navIssues, icon: 'ti ti-list-details' },

@@ -646,14 +646,13 @@ const NewsDetail: React.FC = () => {
             textAlign: 'center',
             pointerEvents: 'none',
             whiteSpace: 'nowrap',
-            animation: 'fadeInUp 0.2s ease',
           }}
         >
           {showToast}
         </div>
       )}
 
-      {/* Slide-up Native Share Sheet Drawer */}
+      {/* Native Share Sheet Drawer */}
       {showShareSheet && (
         <>
           {/* Backdrop click close */}
@@ -667,7 +666,6 @@ const NewsDetail: React.FC = () => {
               bottom: 0,
               background: 'rgba(0,0,0,0.4)',
               zIndex: 90,
-              animation: 'fadeIn 0.2s ease',
             }}
           />
 
@@ -682,7 +680,6 @@ const NewsDetail: React.FC = () => {
               borderRadius: '24px 24px 0 0',
               padding: '18px 18px 30px',
               zIndex: 95,
-              animation: 'slideUp 0.25s cubic-bezier(0.1, 0.76, 0.55, 0.94)',
               boxShadow: '0 -4px 16px rgba(0,0,0,0.1)',
             }}
           >

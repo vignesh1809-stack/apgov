@@ -109,10 +109,10 @@ const NewsList: React.FC = () => {
               {t.noNewsFound}
             </div>
           ) : (
-            filteredNews.map((item, idx) => (
+            filteredNews.map((item) => (
               <div 
                 key={item.id} 
-                className={`nc d${1 + idx}`} 
+                className="nc" 
                 onClick={() => navigate(`/news/${item.id}`)}
                 style={{ marginBottom: 0 }}
               >

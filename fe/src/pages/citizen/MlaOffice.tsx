@@ -294,7 +294,6 @@ const MlaOffice: React.FC = () => {
           textAlign: 'center',
           pointerEvents: 'none',
           whiteSpace: 'nowrap',
-          animation: 'fadeInUp 0.2s ease',
         }}>
           {t.appointmentSuccess}
         </div>

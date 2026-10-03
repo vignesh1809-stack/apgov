@@ -120,7 +120,7 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
       {isDashboard && user?.role !== 'fieldofficer' && user?.role !== 'coordinator' && (
         <header className="app-topbar-wrapper">
           {user?.role === 'citizen' ? (
-            <div className="citizen-topbar d1">
+            <div className="citizen-topbar">
               <div className="trow">
                 <div style={{ cursor: 'pointer' }} onClick={() => navigate('/profile')}>
                   <div className="greet">{language === 'te' ? 'నమస్కారం · శుభోదయం' : 'Namaskaram · Good morning'}</div>
@@ -250,8 +250,8 @@ const AppShell: React.FC<AppShellProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Glassmorphism Floating Bottom Nav (For MLA and Citizen) */}
-      {user?.role !== 'fieldofficer' && user?.role !== 'coordinator' && <BottomNav />}
+      {/* Glassmorphism Floating Bottom Nav (For MLA only - removed for citizen) */}
+      {user?.role === 'mla' && <BottomNav />}
 
       {/* Field Officer Bottom Nav (Fixed) */}
       {user?.role === 'fieldofficer' && currentScreen !== 'detail' && (

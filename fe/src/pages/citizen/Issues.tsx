@@ -1603,8 +1603,8 @@ const Issues: React.FC = () => {
           )}
         </div>
 
-        {/* Space for Bottom Nav spacing */}
-        <div style={{ height: '50px' }} />
+        {/* Bottom clearance */}
+        <div style={{ height: '16px' }} />
       </div>
 
       {/* Floating Action Button */}

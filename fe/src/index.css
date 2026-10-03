@@ -646,7 +646,7 @@ html, body {
 
 .floating-add-btn {
   position: absolute;
-  bottom: 95px;
+  bottom: 24px;
   right: 20px;
   width: 50px;
   height: 50px;
@@ -660,15 +660,10 @@ html, body {
   justify-content: center;
   cursor: pointer;
   z-index: 80;
-  transition: var(--transition);
 }
 .floating-add-btn:hover {
   background: var(--gold-dark);
   color: #fff;
-  transform: translateY(-2px);
-}
-.floating-add-btn:active {
-  transform: scale(0.9);
 }
 .floating-add-btn i {
   font-size: 24px;
@@ -680,43 +675,23 @@ html, body {
   background: linear-gradient(145deg, #f2f6fa 0%, #fffef4 100%);
 }
 
-@keyframes slideUp {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes scaleIn {
-  from { transform: scale(0.78); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-@keyframes bellWag {
-  0%, 100% { transform: rotate(0); }
-  15% { transform: rotate(13deg); }
-  30% { transform: rotate(-10deg); }
-  45% { transform: rotate(8deg); }
-  60% { transform: rotate(-5deg); }
-  75% { transform: rotate(3deg); }
-}
-@keyframes dotBeat {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.5); opacity: 0.5; }
-}
-@keyframes badgePop {
-  0% { transform: scale(0); }
-  70% { transform: scale(1.15); }
-  100% { transform: scale(1); }
-}
-@keyframes stripGlow {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0); }
-  50% { box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.12); }
+/* Zero motion effects for Citizen views */
+.citizen-topbar,
+.citizen-topbar *,
+.citizen-scroll,
+.citizen-scroll * {
+  animation: none !important;
 }
 
-.d1 { animation: slideUp .38s ease .04s both; }
-.d2 { animation: slideUp .38s ease .1s both; }
-.d3 { animation: slideUp .38s ease .16s both; }
-.d4 { animation: slideUp .38s ease .22s both; }
-.d5 { animation: slideUp .38s ease .28s both; }
-.d6 { animation: slideUp .38s ease .34s both; }
-.d7 { animation: slideUp .38s ease .40s both; }
+.citizen-topbar .bell:active,
+.citizen-scroll .qa:hover,
+.citizen-scroll .qa-ico:hover,
+.citizen-scroll .nc:hover,
+.citizen-scroll .issue-card:hover,
+.citizen-scroll .floating-add-btn:hover,
+.citizen-scroll .floating-add-btn:active {
+  transform: none !important;
+}
 
 /* Citizen Topbar Overrides */
 .citizen-topbar {
@@ -766,7 +741,6 @@ html, body {
 .bell i {
   font-size: 19px;
   color: #CC9900;
-  animation: bellWag 4s ease 1.5s infinite;
 }
 .bell-badge {
   position: absolute;
@@ -783,7 +757,6 @@ html, body {
   font-size: 8px;
   font-weight: 800;
   color: #fff;
-  animation: badgePop .4s ease .8s both;
 }
 .vchip {
   display: inline-flex;
@@ -857,11 +830,7 @@ html, body {
   font-weight: 800;
   color: #fff;
 }
-.qa:nth-child(1) .qa-ico { animation: scaleIn .32s ease .08s both; }
-.qa:nth-child(2) .qa-ico { animation: scaleIn .32s ease .15s both; }
-.qa:nth-child(3) .qa-ico { animation: scaleIn .32s ease .22s both; }
-.qa:nth-child(4) .qa-ico { animation: scaleIn .32s ease .29s both; }
-.qa:nth-child(5) .qa-ico { animation: scaleIn .32s ease .36s both; }
+
 .qa-lbl {
   font-size: 10px;
   font-weight: 700;
@@ -878,7 +847,6 @@ html, body {
   border: 1px solid rgba(255, 215, 0, 0.28);
   border-radius: 18px;
   overflow: hidden;
-  animation: stripGlow 3s ease 2s infinite;
 }
 .ss {
   flex: 1;
@@ -916,7 +884,6 @@ html, body {
   display: inline-block;
   margin-right: 3px;
   vertical-align: middle;
-  animation: dotBeat 1.8s ease-in-out infinite;
 }
 
 /* Feed Switcher */

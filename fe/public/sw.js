@@ -1,4 +1,4 @@
-const CACHE_NAME = 'apgov-janaseva-v1';
+const CACHE_NAME = 'apgov-janaseva-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
